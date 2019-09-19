@@ -8,6 +8,7 @@
 #include <unordered_set>
 #include <random>
 #include <chrono>
+#include<fstream>
 using namespace std;
 
 // Function to swap 
@@ -41,48 +42,48 @@ int partition(vector<int> &A, int left, int right, int pivot) {
 // Function to generate a vector of disctinct values
 void generateVector(vector<int> &A, int vector_size) {
 	cout << "Generation started ..." << endl;
-	unordered_set<int> in_vector;
+	//unordered_set<int> in_vector;
 	int random_val;
-	while (A.size() <= vector_size)
-	{
-		srand(static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
-		random_val = rand() % (vector_size+1) + (-1*vector_size);
-		unordered_set<int>::const_iterator itr = in_vector.find(random_val);
-		if (itr == in_vector.end()) {
-			A.push_back(random_val);
-			in_vector.insert(random_val);
+	ofstream text_file("100000.txt");
+	if (text_file.is_open()) {
+		text_file << "{";
+		while (A.size() <= vector_size)
+		{
+			srand(static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
+			random_val = rand() % (2 * vector_size) + (vector_size);
+			//unordered_set<int>::const_iterator itr = in_vector.find(random_val);
+			//if (itr == in_vector.end()) {
+				A.push_back(random_val);
+				//in_vector.insert(random_val);
+				text_file << random_val << " ,";
+			//}
 		}
-
-
-	} 
-
-	in_vector.empty();
+		text_file << " }";
+	}
+	 
+	//in_vector.empty();
 	cout << "Generation completed!" << endl;
 }
 
 int Selection(vector<int> &A, int left, int right, int k) {
-	
-
-		int random_pivot = rand() % right + left;
-
-		if (random_pivot >= A.size() || random_pivot > right) {
-			cout << "Random_pivot: " << random_pivot << " left: " << left << " right: " << right << endl;
-		}
-		else {
-			int position = partition(A, left, right, random_pivot);
-
-			if (position + 1 == k) {
-				return A[position];
-			}
-			else if (position + 1 < k) {
-				return Selection(A, position, right, k);
-			}
-			else {
-				return Selection(A, left, position, k);
-			}
-		}
+	int random_pivot = 0;
+	do {
+		random_pivot = left + rand() % right + left;
+	} while (random_pivot >= A.size() || random_pivot > right || random_pivot < left);
 		
-	
+
+	int position = partition(A, left, right, random_pivot);
+
+	if (position + 1 == k) {
+		return A[position];
+	}
+	else if (position + 1 < k) {
+		Selection(A, position, right, k);
+	}
+	else {
+		Selection(A, left, position, k);
+	}
+			
 }
 
 int main()
