@@ -156,14 +156,20 @@ int main()
 	cin >> k;
 
 	int Kth_smallest = 0;
+
+	clock_t begin = clock();
 	Kth_smallest = SelectionWithMedianOfThreePivot(B, 0, B.size() - 1, k);
-
+	clock_t end = clock();
 	cout << "Kth smallest by median of 3 is: " << Kth_smallest << endl;
+	double duration = double(end - begin) / CLOCKS_PER_SEC;
+	cout << "Duration to find Kth smallest by median of 3: " << duration << "ms" << endl;
 
+	begin = clock();
 	Kth_smallest = SelectionWithRandomPivot(A, 0, A.size() - 1, k);
-
+	end = clock();
 	cout << "Kth smallest by random pivot is : " << Kth_smallest << endl;
-
+	duration = double(end - begin) / CLOCKS_PER_SEC;
+	cout << "Duration to find Kth smallest by random pivot: " << duration << "ms" << endl;
 	
 }
 
