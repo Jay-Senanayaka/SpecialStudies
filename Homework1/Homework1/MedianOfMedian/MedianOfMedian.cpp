@@ -12,7 +12,7 @@
 using namespace std;
 
 struct RandomGenerator {
-	
+
 	int maxValue;
 	RandomGenerator(int max) :
 		maxValue(max) {
@@ -36,26 +36,33 @@ void swap(int* a, int* b)
 int partition(vector<int>& A, int left, int right, int pivot) {
 
 	int s = 0;
-
+	int smaller = 0;
 	for (int i = left; i <= right; i++) {
-		if (A[i] == pivot)
+		if (A[i] == pivot) {
 			s = i;
-	}
-
-	swap(&A[right], &A[s]);
-
-	int pivot_val = A[right];
-	int j = left;
-	for (int i = left; i <= right - 1; i++) {
-		if (A[i] <= pivot_val) {
-			swap(&A[i], &A[j]);
-			j++;
 		}
+		if (A[i] < pivot)
+			smaller++;
+
 	}
 
-	swap(&A[j], &A[right]);
+	int piv_I = left + smaller;
 
-	return j;
+	swap(&A[s], &A[piv_I]);
+
+	int i = left;
+	int j = right;
+
+	while (i < j) {
+		if (A[i] >= pivot && A[j] < pivot)
+			swap(&A[i], &A[j]);
+		if (A[i] < pivot)
+			i++;
+		if (A[j] >= pivot)
+			j--;
+	}
+
+	return piv_I;
 
 }
 
@@ -63,27 +70,25 @@ int partition(vector<int>& A, int left, int right, int pivot) {
 void generateVector(vector<int>& A, int vector_size) {
 	cout << "Generation started ..." << endl;
 	srand(time(0));
-	generate(A.begin(), A.end(), RandomGenerator(vector_size));
+	generate(A.begin(), A.end(), RandomGenerator(8 * vector_size));
 
 	cout << "Generation completed!" << endl;
 }
 
-//DEBUGGING-------------------------------------------------------------------
-void printArray(vector<int> A, int start,int end) {
-	for (int i = start; i <= end; i++) {
-		cout << A[i] << " ";
-	}
-	cout << endl;
-}
+
+
+
 
 int findMedian(vector<int> arr, int start, int end, int n)
 {
+
+
 	int i, key, j;
-	for (int i = start +1; i <= end; i++) {
+	for (int i = start + 1; i <= end; i++) {
 		key = arr[i];
 		j = i - 1;
 
-		while (j >= 0 && arr[j] > key) {
+		while (j >= start && arr[j] > key) {
 			arr[j + 1] = arr[j];
 			j = j - 1;
 		}
@@ -94,8 +99,10 @@ int findMedian(vector<int> arr, int start, int end, int n)
 	return arr[start + n / 2];
 }
 
+
+
 int Selection(vector<int>& A, int left, int right, int k) {
-	
+
 	// If k is smaller than number of elements in array 
 	if (k > 0 && k <= right - left + 1)
 	{
@@ -109,40 +116,51 @@ int Selection(vector<int>& A, int left, int right, int k) {
 		if (size * 5 < n)
 			size++;
 
-		int i;
+		int i = 0;
 		vector<int> median(size); // There will be floor((n+4)/5) groups; 
-		for (i = 0; i < n / 5; i++) {
-			median[i] = findMedian(A, i * 5, i * 5 + 4, 5);
-			
+		if (n >= 5) {
+			for (i = 0; i < n / 5; i++) {
+				median[i] = findMedian(A, i * 5 + left, i * 5 + 4 + left, 5);
+
+			}
 		}
-		
+
 		if (i * 5 < n) //For last group with less than 5 elements 
 		{
-			median[i] = findMedian(A,i*5,(i*5)+(n%5-1), n % 5);
+			median[i] = findMedian(A, i * 5 + left, (i * 5 + left) + (n % 5 - 1), n % 5);
 			i++;
 		}
 
-		
+		/*cout << endl << "medarray" << endl;
+		printA(median, median.size());*/
 
 		// Find median of all medians using recursive call. 
 		// If median[] has only one element, then no need 
 		// of recursive call 
-		int medOfMed = (i == 1) ? median[i - 1] :
-			Selection(median, 0, i - 1, i / 2);
+
+		int medOfMed = (size == 1) ? median[size - 1] :
+			Selection(median, 0, size - 1, size / 2);
 
 		// Partition the array around a random element and 
 		// get position of pivot element in sorted array 
-	
+		//cout << medOfMed << endl;
+
 		int pos = partition(A, left, right, medOfMed);
-		
+
 		// If position is same as k 
 		if (pos - left == k - 1)
 			return A[pos];
-		if (pos - left > k - 1)  // If position is more, recur for left 
+		else if (pos - left > k - 1) {  // If position is more, recur for left 
+			//cout << "pos - " << pos - left << " and k " << k - 1 << "LEFT"<<endl;
 			return Selection(A, left, pos - 1, k);
-		
-		// Else recur for right subarray 
-		return Selection(A, pos + 1, right, k - pos + left - 1);
+
+		}
+
+		// Else recur for right subarray
+		else {
+			//cout << "pos - " << pos - left << " and k " << k - 1 << endl;
+			return Selection(A, pos + 1, right, k - pos + left - 1);
+		}
 	}
 
 	// If k is more than number of elements in array 
@@ -152,30 +170,29 @@ int Selection(vector<int>& A, int left, int right, int k) {
 
 int testAlgo(vector<int>& A, int k) {
 
-	return 0;
-
-}
-
-//DEBUGGING--------------------------------------------------------
-void printA(vector<int> A, int size) {
-	
 	int i, key, j;
-	for (int i = 1; i < A.size(); i++) {
+	for (i = 1; i < A.size(); i++)
+	{
 		key = A[i];
 		j = i - 1;
 
-		while (j >= 0 && A[j] > key) {
+		/* Move elements of arr[0..i-1], that are
+		greater than key, to one position ahead
+		of their current position */
+		while (j >= 0 && A[j] > key)
+		{
 			A[j + 1] = A[j];
 			j = j - 1;
 		}
-
 		A[j + 1] = key;
 	}
-	
-	for (int i = 0; i < size; i++) {
-		cout << A[i] << endl;
-	}
+
+	return A[k - 1];
 }
+
+
+
+
 
 int main()
 {
@@ -189,17 +206,19 @@ int main()
 	vector<int> A(vector_size);
 	generateVector(A, vector_size);
 
-	//printA(A, vector_size);
+
 
 	int k;
 	cout << "Find Kth smallest where K is: ";
 	cin >> k;
 
-	int Kth_smallest = Selection(A, 0, A.size() - 1, k);
 
-	//printA(A, vector_size);
+	int Kth_smallest = Selection(A, 0, A.size() - 1, k);
+	int testK = testAlgo(A, k);
+
 
 	cout << "Kth smallest is: " << Kth_smallest << endl;
+	cout << "Test is: " << testK << endl;
 
 }
 
