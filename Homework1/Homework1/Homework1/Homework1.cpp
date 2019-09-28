@@ -162,10 +162,13 @@ int SelectionWithMedianOfThreePivot(vector<int>& A, int left, int right, int k) 
 
 int SelectionWithMedianOfMedian(vector<int>& A, int left, int right, int k) {
 
+	int n = right - left + 1; // Number of elements in arr[l..r] 
+	if (left == right) return A[left];
+	else if (n < 5) return findMedian(A, left, right, n);
+
 	// If k is smaller than number of elements in array 
 	if (k > 0 && k <= right - left + 1)
 	{
-		int n = right - left + 1; // Number of elements in arr[l..r] 
 
 		// Divide arr[] in groups of size 5, calculate median 
 		// of every group and store it in median[] array. 
@@ -195,7 +198,7 @@ int SelectionWithMedianOfMedian(vector<int>& A, int left, int right, int k) {
 		// If median[] has only one element, then no need 
 		// of recursive call 
 
-		int medOfMed = (size == 1) ? median[size - 1] :
+		int medOfMed = (size <= 2) ? median[size - 1] :
 			SelectionWithMedianOfMedian(median, 0, size - 1, size / 2);
 
 		// Partition the array around a random element and 
@@ -214,6 +217,7 @@ int SelectionWithMedianOfMedian(vector<int>& A, int left, int right, int k) {
 
 		int pos = partition(A, left, right, s);
 
+
 		// If position is same as k 
 		if (pos - left == k - 1)
 			return A[pos];
@@ -228,6 +232,9 @@ int SelectionWithMedianOfMedian(vector<int>& A, int left, int right, int k) {
 
 			return SelectionWithMedianOfMedian(A, pos + 1, right, k - pos + left - 1);
 		}
+
+
+
 	}
 
 	// If k is more than number of elements in array 
