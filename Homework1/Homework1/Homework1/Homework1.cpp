@@ -64,7 +64,7 @@ vector<int> generateVector(int vector_size) {
 		text_file << "{";
 		while (A.size() < vector_size)
 		{
-			random_val = rand() % (2 * vector_size) + (vector_size);
+			random_val = rand() % (2 * vector_size) + (0);
 			A.push_back(random_val);
 			text_file << random_val << " ,";
 
