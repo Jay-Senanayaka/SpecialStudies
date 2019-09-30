@@ -1,4 +1,4 @@
-// medofmedv2.cpp : This file contains the 'main' function. Program execution begins and ends there.
+// Homework1.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 #include <iostream>
 #include <vector>
@@ -26,13 +26,15 @@ struct IndexToVal
 };
 
 // A comparator to check 
-bool Comparator(IndexToVal i, IndexToVal j) {
+bool Comparator(IndexToVal i, IndexToVal j) 
+{
 	return i.val < j.val;
 }
 
 
 // Function to partition around a pivot and return the new pivot location
-int partition(vector<int>& A, int left, int right, int pivot) {
+int partition(vector<int>& A, int left, int right, int pivot) 
+{
 
 	swap(&A[right], &A[pivot]);
 
@@ -52,7 +54,8 @@ int partition(vector<int>& A, int left, int right, int pivot) {
 }
 
 // Function to generate a vector of disctinct values
-vector<int> generateVector(int vector_size) {
+vector<int> generateVector(int vector_size) 
+{
 	vector<int> A;
 	cout << "Generation started ..." << endl;
 
@@ -98,7 +101,8 @@ int findMedian(vector<int> &arr, int start, int end, int n)
 
 
 // Selection algorithm to find the Kth smallest by using the pivot to be random
-int SelectionWithRandomPivot(vector<int>& A, int left, int right, int k) {
+int SelectionWithRandomPivot(vector<int>& A, int left, int right, int k) 
+{
 	int random_pivot = 0;
 	do {
 		random_pivot = left + rand() % (right + left);
@@ -164,12 +168,12 @@ int SelectionWithMedianOfMedian(vector<int>& A, int left, int right, int k) {
 
 	int n = right - left + 1; // Number of elements in arr[l..r]
 	if (left == right) return A[left];
-	/*else if (n < 5) return findMedian(A, left, right, n);*/
+	
 
 	// If k is smaller than number of elements in array 
 	if (k > 0 && k <= right - left + 1)
 	{
-		//int n = right - left + 1; // Number of elements in arr[l..r]
+		
 		// Divide arr[] in groups of size 5, calculate median 
 		// of every group and store it in median[] array. 
 
@@ -222,7 +226,7 @@ int SelectionWithMedianOfMedian(vector<int>& A, int left, int right, int k) {
 		if (pos - left == k - 1)
 			return A[pos];
 		else if (pos - left > k - 1) {  // If position is more, recur for left 
-			//cout << "pos - " << pos - left << " and k " << k - 1 << "LEFT"<<endl;
+			
 			return SelectionWithMedianOfMedian(A, left, pos - 1, k);
 
 		}
@@ -242,6 +246,7 @@ int SelectionWithMedianOfMedian(vector<int>& A, int left, int right, int k) {
 
 }
 
+
 int main()
 {
 	srand(static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
@@ -252,74 +257,71 @@ int main()
 	cin >> vector_size;
 	A = generateVector(vector_size);
 	B = A;
-	//C = A;
+	
 
 	int k1 = 10;
 	int k2 = 1000;
-	/*cout << "Find Kth smallest where K is: ";
-	cin >> k;*/
+
+	int K[] = { 10,1000 };
+
+	sort(B.begin(), B.end());
+	int Correct_K1 = B[k1 - 1];
+	int Correct_K2 = B[k2 - 1];
+	B = A;
+
 
 	int Kth_smallest = 0;
+	double time1 = 0;
+	double time2 = 0;
+	double time3 = 0;
+	
+	for (int k = 0; k < 2; k++) {
+		if (k == 0) {
+			cout << "Correct K is: " << Correct_K1 << endl;
+		}
+		else {
+			cout << "Correct K is: " << Correct_K2 << endl;
+		}
+		
+		for (int i = 0; i < 3; i++) {
 
-	for (int i = 0; i < 3; i++) {
+			clock_t begin = clock();
+			Kth_smallest = SelectionWithMedianOfThreePivot(A, 0, A.size() - 1, K[k]);
+			clock_t end = clock();
+			cout << "Kth smallest by median of 3 is: " << Kth_smallest << endl;
+			double duration = double(end - begin) / CLOCKS_PER_SEC;
+			time1 += duration;
+			cout << "Duration to find Kth smallest by median of 3: " << duration << "s" << endl;
 
-		clock_t begin = clock();
-		Kth_smallest = SelectionWithMedianOfThreePivot(A, 0, A.size() - 1, k1);
-		clock_t end = clock();
-		cout << "Kth smallest by median of 3 is: " << Kth_smallest << endl;
-		double duration = double(end - begin) / CLOCKS_PER_SEC;
-		cout << "Duration to find Kth smallest by median of 3: " << duration << "s" << endl;
+			A = B;
 
-		A = B;
+			begin = clock();
+			Kth_smallest = SelectionWithRandomPivot(A, 0, A.size() - 1, K[k]);
+			end = clock();
+			cout << "Kth smallest by random pivot is : " << Kth_smallest << endl;
+			duration = double(end - begin) / CLOCKS_PER_SEC;
+			time2 += duration;
+			cout << "Duration to find Kth smallest by random pivot: " << duration << "s" << endl;
 
-		begin = clock();
-		Kth_smallest = SelectionWithRandomPivot(A, 0, A.size() - 1, k1);
-		end = clock();
-		cout << "Kth smallest by random pivot is : " << Kth_smallest << endl;
-		duration = double(end - begin) / CLOCKS_PER_SEC;
-		cout << "Duration to find Kth smallest by random pivot: " << duration << "s" << endl;
+			A = B;
 
-		A = B;
+			begin = clock();
+			Kth_smallest = SelectionWithMedianOfMedian(A, 0, A.size() - 1, K[k]);
+			end = clock();
+			cout << "Kth smallest by median of median is : " << Kth_smallest << endl;
+			duration = double(end - begin) / CLOCKS_PER_SEC;
+			time3 += duration;
+			cout << "Duration to find Kth smallest by median of median: " << duration << "s" << endl;
+			cout << endl << endl;
 
-		begin = clock();
-		Kth_smallest = SelectionWithMedianOfMedian(A, 0, A.size() - 1, k1);
-		end = clock();
-		cout << "Kth smallest by median of median is : " << Kth_smallest << endl;
-		duration = double(end - begin) / CLOCKS_PER_SEC;
-		cout << "Duration to find Kth smallest by median of median: " << duration << "s" << endl;
-		cout << endl << endl;
-
-		A = B;
+			A = B;
+		}
+		cout << "=====================================================================================" << endl;
 	}
-
-	for (int i = 0; i < 3; i++) {
-
-		clock_t begin = clock();
-		Kth_smallest = SelectionWithMedianOfThreePivot(A, 0, A.size() - 1, k2);
-		clock_t end = clock();
-		cout << "Kth smallest by median of 3 is: " << Kth_smallest << endl;
-		double duration = double(end - begin) / CLOCKS_PER_SEC;
-		cout << "Duration to find Kth smallest by median of 3: " << duration << "s" << endl;
-
-		A = B;
-
-		begin = clock();
-		Kth_smallest = SelectionWithRandomPivot(A, 0, A.size() - 1, k2);
-		end = clock();
-		cout << "Kth smallest by random pivot is : " << Kth_smallest << endl;
-		duration = double(end - begin) / CLOCKS_PER_SEC;
-		cout << "Duration to find Kth smallest by random pivot: " << duration << "s" << endl;
-
-		A = B;
-
-		begin = clock();
-		Kth_smallest = SelectionWithMedianOfMedian(A, 0, A.size() - 1, k2);
-		end = clock();
-		cout << "Kth smallest by median of median is : " << Kth_smallest << endl;
-		duration = double(end - begin) / CLOCKS_PER_SEC;
-		cout << "Duration to find Kth smallest by median of median: " << duration << "s" << endl;
-		cout << endl << endl;
-
-		A = B;
-	}
+	
+	cout << "Average time for Median of 3: " << time1 / 6 << endl;
+	cout << "Average time for random pivot: " << time2 / 6 << endl;
+	cout << "Average time for Median of medians: " << time3 / 6 << endl;
+	
+	
 }
