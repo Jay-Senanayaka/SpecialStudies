@@ -5,11 +5,14 @@
 #include <vector>
 #include <queue>
 #include <unordered_set>
+#include <time.h>
+#include <chrono>
 using namespace std;
 
 // Global variables
 vector<vector<pair<int, int>>> GraphWithWeights;
 vector<pair<int, int>> Coordinates;
+int counter = 0;
 
 // Function to generate the graph
 void GenerateGraph(string lenFilePath) {
@@ -23,7 +26,7 @@ void GenerateGraph(string lenFilePath) {
 	string line;
 	
 	if (dataFile.is_open()) {
-		cout << "Congrats you opened a file" << endl;
+		
 		getline(dataFile, line);
 
 
@@ -58,7 +61,7 @@ void GenerateCoordinateGraph(string coFilePath) {
 	dataFile.open(coFilePath, std::ios_base::in);
 
 	if (dataFile.is_open()) {
-		cout << "Congrats you opened a file" << endl;
+		
 		getline(dataFile, line);
 
 		while (getline(dataFile, line)) {
@@ -75,7 +78,7 @@ double EuclideanDistance(double x1, double y1, double x2, double y2) {
 }
 
 
-void AStar(int start_vertex, int end_vertex, double *heuristic) {
+void AStar(int start_vertex, int end_vertex) {
 	vector<double> dist;
 	priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> open;
 	//queue<int> closed;
@@ -90,6 +93,7 @@ void AStar(int start_vertex, int end_vertex, double *heuristic) {
 			dist.push_back(0);
 			open.push(make_pair(0,start_vertex));
 			in_open.insert(start_vertex);
+			counter++;
 		}
 		else {
 			dist.push_back(INT_MAX);
@@ -107,7 +111,7 @@ void AStar(int start_vertex, int end_vertex, double *heuristic) {
 		//in_closed.insert(current_node);
 
 		if (current_node == end_vertex) {
-			cout << "Target reached! : " << current_node << endl;
+			cout << "Started at node : " << start_vertex << " and reached target node: " << current_node << ". Input end node :" << end_vertex << endl;
 			return;
 		}
 
@@ -118,8 +122,10 @@ void AStar(int start_vertex, int end_vertex, double *heuristic) {
 			if (length < dist[GraphWithWeights[current_node][i].first]) {
 				dist[GraphWithWeights[current_node][i].first] = length;
 				if (in_open.find(GraphWithWeights[current_node][i].first) == in_open.end()) {
-					open.push(make_pair(length + heuristic[GraphWithWeights[current_node][i].first], GraphWithWeights[current_node][i].first));
+					//open.push(make_pair(length + heuristic[GraphWithWeights[current_node][i].first], GraphWithWeights[current_node][i].first));
+					open.push(make_pair(length + EuclideanDistance(Coordinates[current_node].first, Coordinates[current_node].second, Coordinates[end_vertex].first, Coordinates[end_vertex].second), GraphWithWeights[current_node][i].first));
 					in_open.insert(GraphWithWeights[current_node][i].first);
+					counter++;
 				}
 			}
 			
@@ -141,16 +147,32 @@ int main() {
 	string coFilePath = "C:/Users/JaY/Documents/UWW- Graduate/Fall 2019/Special Studies/Homework/Homework2/Data/NewYork.co";
 
 	GenerateGraph(lenFilePath);
-	cout << GraphWithWeights[0][1].first << GraphWithWeights[0][1].second << endl;
-	cout << GraphWithWeights[1][1].first << GraphWithWeights[1][1].second << endl;
+	/*cout << GraphWithWeights[0][1].first << GraphWithWeights[0][1].second << endl;
+	cout << GraphWithWeights[1][1].first << GraphWithWeights[1][1].second << endl;*/
 
 	GenerateCoordinateGraph(coFilePath);
 
-	double * heuristic = new double[Coordinates.size()];
+	/*double * heuristic = new double[Coordinates.size()];*/
 
-	int end_vertex = 2245;
-	int start_vertex = 1;
-	GenerateEuclidianHeuristics(heuristic, end_vertex);
-
-	AStar(start_vertex, end_vertex, heuristic);
+	srand(time(NULL));
+	double duration = 0;
+	int average_edges_relaxed = 0;
+	//GenerateEuclidianHeuristics(heuristic, end_vertex);
+	for (int i = 0; i < 10; i++) {
+		int end_vertex = rand() % Coordinates.size();
+		int start_vertex = end_vertex;
+		while (end_vertex == start_vertex) {
+			start_vertex = rand() % Coordinates.size();
+		}
+		cout << "Starting Round " << i+1 << "..." << endl;
+		auto started = chrono::high_resolution_clock::now();
+		AStar(start_vertex, end_vertex);
+		auto done = chrono::high_resolution_clock::now();
+		duration += chrono::duration_cast<chrono::milliseconds>(done - started).count();
+		average_edges_relaxed += counter;
+		counter = 0;
+	}
+	cout << "Time (ms): " << duration/10 << endl;
+	cout << "Edges relaxed: " << average_edges_relaxed / 10 << endl;
+	
 }
