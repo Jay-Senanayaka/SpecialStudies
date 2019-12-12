@@ -5,11 +5,13 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <vector>
 using namespace std;
 
 #pragma region Global Variables
 string line;
 char *BWT;
+char* fArray;
 
 #pragma endregion
 
@@ -136,7 +138,7 @@ void generateRLBWT(char* BWT, int len) {
 	}
 	str += to_string(counter) + current;
 
-	ofstream myfile("C:/Users/JaY/Documents/UWW- Graduate/Fall 2019/Special Studies/Homework/Homework3/Output/test.txt");
+	ofstream myfile("C:/Users/IDP-admin/source/repos/SpecialStudies/Homework2/Homework3/Output/test.txt");
 	if (myfile.is_open()) {
 		myfile << str;
 		myfile.close();
@@ -184,6 +186,52 @@ void loadTest(int length) {
 		<< (clock() - startTime) / CLOCKS_PER_SEC << "sec";
 }
 
+void decodeBWT(int *SA, int len) {
+
+	fArray = new char[len];
+	
+
+	for (int i = 0; i < len; i++) {
+		fArray[i] = line[SA[i]];
+	}
+
+	int fIndex = 0;
+	int bCount = 0;
+	int fCount = 0;
+	char bwtVal = BWT[fIndex];
+	string resultstr = "";
+
+	while (bwtVal != '$') {
+		
+		resultstr = bwtVal + resultstr;
+
+		for (int i = 0; i <= fIndex; i++) {
+			if (BWT[i] == bwtVal)
+				bCount++;
+		}
+
+		for (int i = 0; i < len; i++) {
+			if (fArray[i] == bwtVal)
+				fCount++;
+
+			if (fCount == bCount) {
+				fIndex = i;
+				break;
+			}
+		}
+
+		bwtVal = BWT[fIndex];
+
+		bCount = 0;
+		fCount = 0;
+	}
+
+	resultstr += bwtVal;
+	
+	cout << resultstr << endl;
+
+}
+
 void correctBWT() {
 	string inputFile1 = "C:/Users/JaY/Documents/UWW- Graduate/Fall 2019/Special Studies/Homework/Homework3/Data/H.pylori.rlbwt";
 	string inputFile2 = "C:/Users/JaY/Documents/UWW- Graduate/Fall 2019/Special Studies/Homework/Homework3/Output/H_pylori.txt";
@@ -225,7 +273,7 @@ int main() {
 	/*testCorrectness();
 	loadTest(10000000);*/
 
-	string inputFile = "C:/Users/JaY/Documents/UWW- Graduate/Fall 2019/Special Studies/Homework/Homework3/Data/test.dna";
+	string inputFile = "C:/Users/IDP-admin/source/repos/SpecialStudies/Homework2/Homework3/Data/test.dna";
 	getInputText(inputFile);
 
 	char *string1 = new char[line.length() + 1];
@@ -233,11 +281,12 @@ int main() {
 	int len = line.length();
 	int *SA = constructSA(string1, len);
 	//cout << "Suffix Array for " << str << ": [";
-	//printArray(SA, len);
+	printArray(SA, len);
 
 	generateBWT(SA, len);
-	//printBWTArray(BWT, len);
+	printBWTArray(BWT, len);
 	generateRLBWT(BWT, len);
+	decodeBWT(SA, len);
 
 	/*correctBWT();*/
 }
